@@ -20,6 +20,10 @@ KNOWN BUGS:
 * the hits/min exponential moving average has something wrong with it. Never got around to fixing.
 * util:logs:smart is not routing-savvy. If you use something other than simple URLs, it's likely to
 get confused.
+* all util:logs methods miss some hits. This is because underlyingly, Capistrano breaks stuff up 
+arbitrarily (by size), rather than by paragraph of log. This could be fixed by writing a wrapper
+that acts as a buffer and stitches the log back together again. I never found it worth the bother.
+If you do, please feel free to commit a fix.
 
 
 IF YOU HAVE OTHER TRICKS:
