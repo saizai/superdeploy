@@ -1,4 +1,3 @@
-
 # Application
 set :application, "my_fancy_app"  # Required
 
@@ -13,20 +12,18 @@ set :user, "you" # The user you log in as
 set :runner, "#{user}" # The user you want to run things as (if different, set up your sudoers file)
 set :deploy_to, "/home/#{user}/#{application}/" # where you want the app deployed. Must be path from root.
 # default_run_options[:pty] = true  # Uncomment if on SunOS (eg Joyent) - http://groups.google.com/group/capistrano/browse_thread/thread/13b029f75b61c09d
-set :use_sudo, false # Uncomment if eg you run on a shared host like DreamHost
-ssh_options[:keys] = %w(~/.ssh/sekrit_deploy_key) # You really should use public keys. It's much easier. Make sure it works on your repo too.
+# set :use_sudo, false # Uncomment if eg you run on a shared host like DreamHost
+# ssh_options[:keys] = %w(~/.ssh/sekrit_deploy_key) # You really should use public keys. It's much easier. Make sure it works on your repo too.
 # ssh_options[:port] = 25
 # set :ip, '##.##.##.##' # IP of repository. Better than using DNS lookups, if it's static
 
 # :no_release => true means that no code will be deployed to that box (but non-code tasks may run on it)
-# :primary => true is currently unused, but could eg be for primary vs slave db servers
-# you can have multiple "role :foo, "serverip", :options=>whatnot" lines, or server "ip", :role, :role2, :role3, :options=>foo
+# :primary => true is mostly unused, but could eg be for primary vs slave db servers
+# You can have multiple server and/or role lines, but it's cleaner to stick to one or the other format
 #server "#{ip}", :app, :db, :web, :primary => true # Single box that does it all
 #role :app, "your app-server here"
 #role :web, "your web-server here"
-#role :db,  "your db-server here", :primary => true
-
-server 'dictionary.conlang.org', :app, :web, :primary => true # We have no access to DB server directly
+#role :db,  "your db-server here", :primary => true, :no_release => true
 
 # Choose your default deploy methods (run cap -T deploy to see your options)
 namespace (:deploy) do
