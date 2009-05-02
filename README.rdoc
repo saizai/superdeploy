@@ -33,6 +33,62 @@ I'd like this to be a nice one-stop library of cool toys that make a Capistrano 
 * log:smart is not very routing-savvy. If you use something other than simple URLs, it's likely to get confused.
 * all log methods miss some hits. This is because underlyingly, Capistrano breaks stuff up  arbitrarily (by size), rather than by paragraph of log. This could be fixed by writing a wrapper that acts as a buffer and stitches the log back together again. I never found it worth the bother. If you do, please feel free to commit a fix.
 
+== Recipe list
+
+  $ cap -T
+	cap capistrano:upgrade           # Update revisions log from Capistrano 1.x.
+	cap deploy                       # Deploys your project.
+	cap deploy:check                 # Test deployment dependencies.
+	cap deploy:cleanup               # Clean up old releases.
+	cap deploy:cold                  # Deploys and starts a `cold' application.
+	cap deploy:configs:setup         # Create the shared configs directory on the...
+	cap deploy:configs:symlink       # Override config files w/ whatever's in the...
+	cap deploy:god:starling:restart  # Restart starling using god
+	cap deploy:god:starling:start    # Start starling using god
+	cap deploy:god:starling:stop     # Stop starling using god
+	cap deploy:god:workling:restart  # Restart workling using god
+	cap deploy:god:workling:start    # Start workling using god
+	cap deploy:god:workling:stop     # Stop workling using god
+	cap deploy:long_deploy           # like update:migrations, but will take down...
+	cap deploy:migrate               # Run the migrate rake task.
+	cap deploy:migrations            # Deploy and run pending migrations.
+	cap deploy:mongrel:seesaw        # seesaw::bounce the server.
+	cap deploy:mongrel:setup_sudoers # Allow mongrel_rails to be sudo-run w/out p...
+	cap deploy:passenger:restart     # Restart using Passenger
+	cap deploy:pending               # Displays the commits since your last deploy.
+	cap deploy:pending:diff          # Displays the `diff' since your last deploy.
+	cap deploy:rollback              # Rolls back to a previous version and resta...
+	cap deploy:rollback:code         # Rolls back to the previously deployed vers...
+	cap deploy:setup                 # Prepares one or more servers for deployment.
+	cap deploy:start                 # Start app using god
+	cap deploy:stop                  # Stop app using god
+	cap deploy:symlink               # Updates the symlink to the most recently d...
+	cap deploy:update                # Copies your project and updates the symlink.
+	cap deploy:update_code           # Copies your project to the remote servers.
+	cap deploy:upload                # Copy files to the currently deployed version.
+	cap deploy:web:disable           # Present a maintenance page to visitors.
+	cap deploy:web:enable            # Makes the application web-accessible again.
+	cap invoke                       # Invoke a single command on the remote serv...
+	cap log                          # Tail logs.
+	cap log:google                   # Last column shows last ~1s of totals.
+	cap log:google_subtotals         # Display live google analytics info, by sub...
+	cap log:short                    # Tail just the hits and errors; pass name o...
+	cap log:smart                    # Display live timings, hitcounts, unique IP...
+	cap shell                        # Begin an interactive Capistrano session.
+	cap sys:apt:install              # Installs a package using the aptitude comm...
+	cap sys:apt:search               # Search for aptitude packages on remote server
+	cap sys:apt:update               # Runs aptitude update on remote server
+	cap sys:apt:upgrade              # Runs aptitude upgrade on remote server
+	cap sys:gems:install             # Install a gem on the release servers
+	cap sys:gems:list                # List gems on release servers
+	cap sys:gems:remove              # Uninstall a gem from the release servers
+	cap sys:gems:update              # Update all gems on release servers
+	cap sys:ruby                     # Grep for ruby processes
+	cap sys:ssh_setup                # Copies contents of ssh public keys into au...
+	cap sys:uname                    # Check uname
+	cap sys:uptime                   # Check uptime
+
+
 == Info
 Author:: Sai Emrys (saizai)
 License:: MIT or CC by-nc-sa (your pick) for my stuff; probably MIT for others'
