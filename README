@@ -12,16 +12,15 @@ Try it out and enjoy.
 TO INSTALL:
 
 script/plugin install git://github.com/saizai/superdeploy.git
-your-favorite-editor config/deploy.rb.example
-mv config/deploy.rb.example config/deploy.rb
 cap -T # See all you can do
-cap util:logs:smart # see the fancy live hits/errors/loadtimes watcher
+cap util:logs:smart # use the fancy live hits/errors/loadtimes watcher
 
 
 IF YOU HAVE OTHER TRICKS:
 Send me a pull request and I'll merge 'em in!
 
 I'd like this to be a nice one-stop library of cool toys that make a Capistrano user's life easier.
+
 
 KNOWN BUGS:
 * the hits/min exponential moving average has something wrong with it. Never got around to fixing.
