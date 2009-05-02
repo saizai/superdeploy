@@ -20,11 +20,11 @@ namespace :sys do
     end
   
     desc "Uninstall a gem from the release servers"
-    task :remove, :roles => :app do
+    task :uninstall, :roles => :app do
       puts "Enter the name of the gem you'd like to remove:"
       gem_name = $stdin.gets.chomp
       logger.info "trying to remove #{gem_name}"
-      sudo "gem install #{gem_name}"
+      sudo "gem uninstall #{gem_name}"
     end
   end
 end
