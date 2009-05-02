@@ -1,4 +1,4 @@
-namespace (:deploy) do
+namespace :deploy do
   namespace :mongrel do
     desc "seesaw::bounce the server. Requires 'deploy ALL = NOPASSWD: /usr/bin/mongrel_rails *' in /etc/sudoers"
     task :seesaw, :roles => :app do

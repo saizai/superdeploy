@@ -1,5 +1,5 @@
 namespace :util do
-  namespace (:ssh) do
+  namespace :ssh do
     desc "Copies contents of ssh public keys into authorized_keys file"
     task :setup do
       sudo "test -d ~/.ssh || mkdir ~/.ssh"

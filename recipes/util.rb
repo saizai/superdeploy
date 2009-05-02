@@ -1,4 +1,4 @@
-namespace (:util) do
+namespace :util do
   desc "Check uptime" 
   task :uptime do
     run "uptime" 

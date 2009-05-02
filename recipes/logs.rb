@@ -1,5 +1,5 @@
 namespace :util do
-  namespace (:logs) do
+  namespace :logs do
     desc 'Tail logs. Optionally pass name of log you want to check - e.g. cap util:logs mongrel. Defaults to #{rails_env}.log'
     task :default, :roles => :app do
 # NOTE: This is ARGV[2] not ARGV[1] because we use  cap *staging* util:logs instead of just cap *util:logs*. Put it back if needed, or better, do a smart regex
