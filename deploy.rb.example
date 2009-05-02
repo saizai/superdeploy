@@ -1,0 +1,51 @@
+
+# Application
+set :application, "my_fancy_app"  # Required
+
+# Repo
+set :scm, :git # :git, :darcs, :subversion, :cvs
+# set :svn, /path/to/svn # or :darcs or :cvs or :git; defaults to checking PATH
+set :repository, "git://github.com/you/fancy_app.git"
+
+# Server
+# set :gateway, "gate.host.com" # for the paranoid sysadmins who require a gateway server
+set :user, "you" # The user you log in as
+set :runner, "#{user}" # The user you want to run things as (if different, set up your sudoers file)
+set :deploy_to, "/home/#{user}/#{application}/" # where you want the app deployed. Must be path from root.
+# default_run_options[:pty] = true  # Uncomment if on SunOS (eg Joyent) - http://groups.google.com/group/capistrano/browse_thread/thread/13b029f75b61c09d
+set :use_sudo, false # Uncomment if eg you run on a shared host like DreamHost
+ssh_options[:keys] = %w(~/.ssh/sekrit_deploy_key) # You really should use public keys. It's much easier. Make sure it works on your repo too.
+# ssh_options[:port] = 25
+# set :ip, '##.##.##.##' # IP of repository. Better than using DNS lookups, if it's static
+
+# :no_release => true means that no code will be deployed to that box (but non-code tasks may run on it)
+# :primary => true is currently unused, but could eg be for primary vs slave db servers
+# you can have multiple "role :foo, "serverip", :options=>whatnot" lines, or server "ip", :role, :role2, :role3, :options=>foo
+#server "#{ip}", :app, :db, :web, :primary => true # Single box that does it all
+#role :app, "your app-server here"
+#role :web, "your web-server here"
+#role :db,  "your db-server here", :primary => true
+
+server 'dictionary.conlang.org', :app, :web, :primary => true # We have no access to DB server directly
+
+# Choose your default deploy methods (run cap -T deploy to see your options)
+namespace (:deploy) do
+  task :restart, :roles => :app do
+    # deploy.mongrel.seesaw
+    # deploy.god.restart
+    deploy.passenger.restart
+  end
+  
+  # Use a shared config directory. Run cap deploy:configs:setup first.
+  # If you do this, be sure to also ensure that all your sekrit config files are in your .gitignore or svn:ignore
+  # e.g.: echo 'config/initializers/*_keys.rb' >> .gitignore  
+  after "deploy:update_code", "deploy:configs:symlink"
+  
+  # Set up special permissions
+#  after "deploy:update_code", "deploy:set_permissions_staging"
+#  task :set_permissions_staging, :except => { :no_release => true } do 
+#      run "rm -f #{release_path}/config/database.yml"
+#      run "cp #{deploy_to}/shared/config/database.yml #{release_path}/config"
+#      run "chmod 775 #{release_path}/config/database.yml"
+#  end  
+end

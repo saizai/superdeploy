@@ -1,53 +1,9 @@
-# =============================================================================
-# TASKS
-# =============================================================================
-# Define tasks that run on all (or only some) of the machines. You can specify
-# a role (or set of roles) that each task should be executed on. You can also
-# narrow the set of servers to a subset of a role by specifying options, which
-# must match the options given for the servers to select (like :primary => true)
-
-namespace (:util) do
-  desc "Check uptime" 
-  task :uptime do
-    run "uptime" 
-  end
-
-  desc "Check uname" 
-  task :uname do
-    run "uname -srp" 
-  end
-
-  desc "Grep for ruby processes" 
-  task :ruby do
-    run "ps -ef |grep ruby | grep -v grep" 
-  end
-  
-  desc "Allow mongrel_rails to be sudo-run w/out password by deploy"
-  task :deploy_without_password, :except => { :no_release => true }  do
-    puts "\n/etc/sudoers before:"
-    sudo "cat /etc/sudoers"
-    puts "\nChecking /etc/sudoers integrity..."
-    sudo "visudo -c"
-    puts "\nChecking /etc/sudoers strict integrity..."
-    sudo "visudo -cs"
-    if (Capistrano::CLI.ui.ask("Modify? ('yes' continues; anything else aborts) ") == "yes")
-      sudo "echo '' >> /etc/sudoers"
-      sudo "echo '# Allow user #{deploy} to run mongrel_rails under sudo without a password, so we can do passwordless cap deploy' >> /etc/sudoers"
-      sudo "echo '#{deploy} ALL = NOPASSWD: /usr/bin/mongrel_rails *' >> /etc/sudoers"
-      puts "\n/etc/sudoers after:"
-      sudo "cat /etc/sudoers"
-      puts "\nChecking /etc/sudoers integrity..."
-      sudo "visudo -c"
-      puts "\nChecking /etc/sudoers strict integrity..."
-      sudo "visudo -cs"
-    end
-  end
-
+namespace :util do
   namespace (:logs) do
-    desc 'Tail log files on the app machine(s). Optionally pass name of log you want to check - e.g. cap util:logs mongrel. Defaults to #{rails_env}.log'
+    desc 'Tail logs. Optionally pass name of log you want to check - e.g. cap util:logs mongrel. Defaults to #{rails_env}.log'
     task :default, :roles => :app do
-      # The != is to allow for e.g. cap staging util:logs, where the 1st task sets up environment
-      log_file = ARGV[1] != 'util:logs' ? ARGV[1] : fetch(:rails_env, "production")
+# NOTE: This is ARGV[2] not ARGV[1] because we use  cap *staging* util:logs instead of just cap *util:logs*. Put it back if needed, or better, do a smart regex
+      log_file = ARGV[2] ? ARGV[2] : fetch(:rails_env, "production")
       run "tail -f #{shared_path}/log/#{log_file}.log" do |channel, stream, data|
         puts  # for an extra line break before the host name
         puts "#{channel[:host]}: #{data}" 
@@ -55,9 +11,9 @@ namespace (:util) do
       end
     end
     
-    desc 'Tail logs w/ egrep "Processing|error|:in"'
+    desc 'Tail just the hits and errors; pass name of log if not #{rails_env}.log'
     task :short, :roles => :app do
-      log_file = ARGV[1] != 'util:logs:short' ? ARGV[1] : fetch(:rails_env, "production")
+      log_file = ARGV[2] ? ARGV[2] : fetch(:rails_env, "production")
       run "tail -f #{shared_path}/log/#{log_file}.log | egrep -i 'Processing|Error|:in'" do |channel, stream, data|
         puts  # for an extra line break before the host name
         puts "#{channel[:host]}: #{data}" 
@@ -73,15 +29,10 @@ namespace (:util) do
       This depends on usage of standard naming, i.e. FooController#bar = http://someip/foo/bar. \
       It is not routing-savvy, so named/special routes (e.g. root) will be displayed twice - once for \
       the URL, once for the controller/action pair. Just add them together manually.
-
       Written by Sai Emrys - http://saizai.com
     DESC
     task :smart, :roles => :app do
-       def camelize(string)
-         string.to_s.gsub(/\/(.?)/) { "::#{$1.upcase}" }.gsub(/(?:^|_)(.)/) { $1.upcase }
-       end
-
-      log_file = ARGV[1] != 'util:logs:smart' ? ARGV[1] : fetch(:rails_env, "production")
+      log_file = ARGV[2] ? ARGV[2] : fetch(:rails_env, "production")
       aggregate = []
       agg_errors = []
       recent_agg = []
@@ -108,16 +59,16 @@ namespace (:util) do
           a[:hits] = 0
         }
 
-	# get an array of arrays of the item processed (FooController#method), and the IP it was processed for
-	new_hits = data.scan(/Processing (\S*) \(for (\S*) at/).collect{|item|
+  # get an array of arrays of the item processed (FooController#method), and the IP it was processed for
+  new_hits = data.scan(/Processing (\S*) \(for (\S*) at/).collect{|item|
          processee = item[0]
          item[0] = item[0].scan /(\w*)Controller#(\w*)/
          item.flatten
         }
 
         new_hits.each {|hit|
-          # e.g. ["User", "index", "111.111.111.111"]
-          controller = camelize(hit[0])
+          # e.g. ["User", "index", "204.15.23.170"]
+          controller = hit[0].capitalize
           action = hit[1].downcase
           ip = hit[2]
           found = false
@@ -145,8 +96,8 @@ namespace (:util) do
           end
         }
         
-	# get an array of arrays of the total time, render time, db time, result, & URL processed
-	new_process = data.scan(/Completed in (\S*) .* Rendering: (\S*) .* DB: (\S*) .* (\S* \S*) \[(\S*)\]/).collect{|item|
+  # get an array of arrays of the total time, render time, db time, result, & URL processed
+  new_process = data.scan(/Completed in (\S*) .* Rendering: (\S*) .* DB: (\S*) .* (\S* \S*) \[(\S*)\]/).collect{|item|
           url = item[4]
           item[4] = item[4].scan(/\/\/[^\/]*\/([^\/]*)\/([^\/?&]*)/) # extracts foo,bar from http://blahblahblah/foo/bar/blahblah
           item[4] = ["Application", ""] if item[4].empty?
@@ -159,7 +110,7 @@ namespace (:util) do
           render = hit[1].to_f
           db = hit[2].to_f
           result = hit[3]
-          controller = camelize(hit[4])
+          controller = hit[4].capitalize
           action = hit[5].downcase
           found = false
           aggregate.each_with_index {|a,i|
@@ -198,16 +149,14 @@ namespace (:util) do
         backtrace_regex = '(\s*[^:\n]*:?\d*:in[^\n]*)?' # must be ' not " so it doesn't interpret the \n etc
         # NOTE: * after () grouping matches the backreference (i.e. whatever that group matched), not the pattern itself (unlike e.g. \d*);
         #      therefore we have to use this total hack to get what we actually want. Fortunately it doesn't really need to be arbitrary size...
-	new_errors = data.scan(/(\S*Error[^\n]*:)#{backtrace_regex * 15}/m).collect{|item| # first get the entire error + backtrace together
+  new_errors = data.scan(/(\S*Error[^\n]*:)#{backtrace_regex * 15}/m).collect{|item| # first get the entire error + backtrace together
           [item[0], item[1..item.size].select{|x| x =~ /Error/ or x =~ /#{deploy_to}/}.join('\n').strip] # trim backtrace to get only the relevant errors
 #          item[1] = backtrace.scan(/.*#{deploy_to}.*:\d*:in.*/).join("\n") rescue "" # trim backtrace to get only the relevant errors
-#	  item.flatten
-	}
-
-        # Insert your own error regex here, e.g. "COMM ERROR blah blah blah"
+#   item.flatten
+  }
         comm_errors = data.scan(/(COMM ERROR.*)/).collect{|item| 
           [item[0], ""]
-	}
+  }
 
         new_errors += comm_errors unless comm_errors.empty?
 
@@ -295,12 +244,10 @@ namespace (:util) do
 
       Last column shows last ~1s of totals. Each * = 1 hit. UnqIP = Unique IPs. H/m = hits per minute (exponential weighted average).
 
-      Requires you to be passing GA-style parameters - i.e. utm_medium, utm_source, etc
-
       Written by Sai Emrys - http://saizai.com
     DESC
     task :google, :roles => :app do
-      log_file = ARGV[1] != 'util:logs:google' ? ARGV[1] : fetch(:rails_env, "production")
+      log_file = ARGV[2] ? ARGV[2] : fetch(:rails_env, "production")
       agg_google = []
       recent_google = []
       size = {:campaign => 8, :medium => 6, :source => 6, :content => 7, :hits => 4}
@@ -315,8 +262,8 @@ namespace (:util) do
         }
         
         new_google = []
-	# get an array of arrays of the total time, render time, db time, result, & URL processed
-	new_process = data.scan(/Completed in (\S*) .* Rendering: (\S*) .* DB: (\S*) .* (\S* \S*) \[(\S*)\]/).collect{|item|
+  # get an array of arrays of the total time, render time, db time, result, & URL processed
+  new_process = data.scan(/Completed in (\S*) .* Rendering: (\S*) .* DB: (\S*) .* (\S* \S*) \[(\S*)\]/).collect{|item|
           url = item[4]
           source = url.match(/[?&]utm_source=([\w]*?)($|[&\s])/)[1] rescue ""
           medium = url.match(/[?&]utm_medium=([\w]*?)($|[&\s])/)[1] rescue ""
@@ -397,7 +344,7 @@ namespace (:util) do
       Written by Sai Emrys - http://saizai.com
     DESC
     task :google_subtotals, :roles => :app do
-      log_file = ARGV[1] != 'util:logs:google_subtotals' ? ARGV[1] : fetch(:rails_env, "production")
+      log_file = ARGV[2] ? ARGV[2] : fetch(:rails_env, "production")
       agg_google = []
       size = {:campaign => 8, :medium => 6, :source => 6, :content => 7, :campaign_hits => 6, :medium_hits => 6, :source_hits => 6, :content_hits => 6}
       subtotals = {:campaign => [], :medium => [], :source => [], :content => []}
@@ -413,8 +360,8 @@ namespace (:util) do
   #      }
         
         new_google = []
-	# get an array of arrays of the total time, render time, db time, result, & URL processed
-	new_process = data.scan(/Completed in (\S*) .* Rendering: (\S*) .* DB: (\S*) .* (\S* \S*) \[(\S*)\]/).collect{|item|
+  # get an array of arrays of the total time, render time, db time, result, & URL processed
+  new_process = data.scan(/Completed in (\S*) .* Rendering: (\S*) .* DB: (\S*) .* (\S* \S*) \[(\S*)\]/).collect{|item|
           url = item[4]
           source = url.match(/[?&]utm_source=([\w]*?)($|[&\s])/)[1] rescue ""
           medium = url.match(/[?&]utm_medium=([\w]*?)($|[&\s])/)[1] rescue ""
@@ -486,163 +433,4 @@ namespace (:util) do
       end # run
     end # task
   end # logs
-
-  namespace (:ssh) do
-    desc "Copies contents of ssh public keys into authorized_keys file"
-    task :setup do
-      sudo "test -d ~/.ssh || mkdir ~/.ssh"
-      sudo "chmod 0700 ~/.ssh"    
-      put(ssh_options[:keys].collect{|key| File.read(key+'.pub')}.join("\n"),
-        File.join('/home', user, '.ssh/authorized_keys'),
-        :mode => 0600 )
-    end
-  end
-  
-  namespace :gems do
-    desc "List gems on release servers"
-    task :list, :except => { :no_release => true } do
-      stream "gem list"
-    end
-  
-    desc "Update all gems on release servers"
-    task :update, :except => { :no_release => true } do
-      sudo "gem update"
-    end
-  
-    desc "Install a gem on the release servers"
-    task :install, :except => { :no_release => true } do
-      # TODO Figure out how to use Highline with this
-      puts "Enter the name of the gem you'd like to install:"
-      gem_name = $stdin.gets.chomp
-      logger.info "trying to install #{gem_name}"
-      sudo "gem install #{gem_name}"
-    end
-  
-    desc "Uninstall a gem from the release servers"
-    task :remove, :except => { :no_release => true } do
-      puts "Enter the name of the gem you'd like to remove:"
-      gem_name = $stdin.gets.chomp
-      logger.info "trying to remove #{gem_name}"
-      sudo "gem install #{gem_name}"
-    end
-  end
-
-  namespace :apt do
-    desc "Runs aptitude update on remote server"
-    task :update do
-      logger.info "Running aptitude update"
-      sudo "aptitude update"
-    end
-  
-    desc "Runs aptitude upgrade on remote server"
-    task :upgrade do
-      sudo_with_input "aptitude upgrade", /^Do you want to continue\?/
-    end
-  
-    desc "Search for aptitude packages on remote server"
-    task :search do
-      puts "Enter your search term:"
-      deb_pkg_term = $stdin.gets.chomp
-      logger.info "Running aptitude update"
-      sudo "aptitude update"
-      stream "aptitude search #{deb_pkg_term}"
-    end
-  
-    desc "Installs a package using the aptitude command on the remote server."
-    task :install do
-      puts "What is the name of the package(s) you wish to install?"
-      deb_pkg_name = $stdin.gets.chomp
-      raise "Please specify deb_pkg_name" if deb_pkg_name == ''
-      logger.info "Updating packages..."
-      sudo "aptitude update"
-      logger.info "Installing #{deb_pkg_name}..."
-      sudo_with_input "aptitude install #{deb_pkg_name}", /^Do you want to continue\?/
-    end
-  end
 end
-
-namespace :upgrade do
-  desc <<-DESC
-    Migrate from the revisions log to REVISION. Capistrano 1.x recorded each \
-    deployment to a revisions.log file. Capistrano 2.x is cleaner, and just \
-    puts a REVISION file in the root of the deployed revision. This task \
-    migrates from the revisions.log used in Capistrano 1.x, to the REVISION \
-    tag file used in Capistrano 2.x. It is non-destructive and may be safely \
-    run any number of times.
-  DESC
-  task :revisions, :except => { :no_release => true } do
-    revisions = capture("cat #{deploy_to}/revisions.log")
-
-    mapping = {}
-    revisions.each do |line|
-      revision, directory = line.chomp.split[-2,2]
-      mapping[directory] = revision
-    end
-
-    commands = mapping.keys.map do |directory|
-      "echo '.'; test -d #{directory} && echo '#{mapping[directory]}' > #{directory}/REVISION"
-    end
-
-    command = commands.join(";")
-
-    run "cd #{releases_path}; #{command}; true" do |ch, stream, out|
-      STDOUT.print(".")
-      STDOUT.flush
-    end
-  end
-end
-
-
-# Fake tasks
-
-#  desc "An imaginary backup task. (Execute the 'show_tasks' task to display all
-#  available tasks.)"
-#  task :backup, :roles => :db do #, :only => { :primary => true }
-#    # the on_rollback handler is only executed if this task is executed within
-#    # a transaction (see below), AND it or a subsequent task fails.
-#    on_rollback { delete "/tmp/dump.sql" }
-#  
-#    run "mysqldump -u theuser -p thedatabase > /tmp/dump.sql" do |ch, stream, out|
-#      ch.send_data "thepassword\n" if out =~ /^Enter password:/
-#    end
-#  end
-  
-  
-  
-  # Tasks may take advantage of several different helper methods to interact
-  # with the remote server(s). These are:
-  #
-  # * run(command, options={}, &block): execute the given command on all servers
-  #   associated with the current task, in parallel. The block, if given, should
-  #   accept three parameters: the communication channel, a symbol identifying the
-  #   type of stream (:err or :out), and the data. The block is invoked for all
-  #   output from the command, allowing you to inspect output and act
-  #   accordingly.
-  # * sudo(command, options={}, &block): same as run, but it executes the command
-  #   via sudo.
-  # * delete(path, options={}): deletes the given file or directory from all
-  #   associated servers. If :recursive => true is given in the options, the
-  #   delete uses "rm -rf" instead of "rm -f".
-  # * put(buffer, path, options={}): creates or overwrites a file at "path" on
-  #   all associated servers, populating it with the contents of "buffer". You
-  #   can specify :mode as an integer value, which will be used to set the mode
-  #   on the file.
-  # * render(template, options={}) or render(options={}): renders the given
-  #   template and returns a string. Alternatively, if the :template key is given,
-  #   it will be treated as the contents of the template to render. Any other keys
-  #   are treated as local variables, which are made available to the (ERb)
-  #   template.
-  
-#  desc "Demonstrates the various helper methods available to recipes."
-#  task :helper_demo do
-#    # "setup" is a standard task which sets up the directory structure on the
-#    # remote servers. It is a good idea to run the "setup" task at least once
-#    # at the beginning of your app's lifetime (it is non-destructive).
-#    setup
-#  
-#    buffer = render("maintenance.rhtml", :deadline => ENV['UNTIL'])
-#    put buffer, "#{shared_path}/system/maintenance.html", :mode => 0644
-#    sudo "killall -USR1 dispatch.fcgi"
-#    run "#{release_path}/script/spin"
-#    delete "#{shared_path}/system/maintenance.html"
-#  end

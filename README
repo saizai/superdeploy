@@ -1,36 +1,35 @@
-This is my Capitrano SuperDeploy library.
+SuperDeploy is a collection of Capistrano recipes; some simple, some not. They just make development easier.
 
-It's a collection of tasks for Capistrano; some simple, some not. They just make development
-easier.
+Many of the tasks in it are cobbled together from a number of other sources. I'd credit them, if I hadn't long since forgotten who wrote 'em. If it's you, just email me and I'll do so.
 
-Many of the tasks in it are cobbled together from a number of other sources. I'd credit them,
-if I hadn't long since forgotten who wrote 'em. If it's you, just email me and I'll do so.
+Some - particularly the util:logs:smart, :short, :google, and :google_subtotals - are mine, and released under Creative Commons by-nc-sa license and MIT license (take your pick).
 
-Some - particularly the util:logs:smart, :short, :google, and :google_subtotals - are mine, and
-released under Creative Commons by-nc-sa license.
-
-util:logs:smart is one I use most routinely. It essentially gives you a live aggregated view of 
-your hits, errors, and load times (by scraping logs), all in a nice little table. 
+util:logs:smart is one I use most routinely. It essentially gives you a live aggregated view of  your hits, errors, and load times (by scraping logs), all in a nice little table. 
 
 Try it out and enjoy.
 
 
-KNOWN BUGS:
+TO INSTALL:
 
+script/plugin install git://github.com/saizai/superdeploy.git
+your-favorite-editor config/deploy.rb.example
+mv config/deploy.rb.example config/deploy.rb
+cap -T # See all you can do
+cap util:logs:smart # see the fancy live hits/errors/loadtimes watcher
+
+
+IF YOU HAVE OTHER TRICKS:
+Send me a pull request and I'll merge 'em in!
+
+I'd like this to be a nice one-stop library of cool toys that make a Capistrano user's life easier.
+
+KNOWN BUGS:
 * the hits/min exponential moving average has something wrong with it. Never got around to fixing.
-* util:logs:smart is not routing-savvy. If you use something other than simple URLs, it's likely to
-get confused.
+* util:logs:smart is not routing-savvy. If you use something other than simple URLs, it's likely to get confused.
 * all util:logs methods miss some hits. This is because underlyingly, Capistrano breaks stuff up 
 arbitrarily (by size), rather than by paragraph of log. This could be fixed by writing a wrapper
 that acts as a buffer and stitches the log back together again. I never found it worth the bother.
 If you do, please feel free to commit a fix.
-
-
-IF YOU HAVE OTHER TRICKS:
-
-Email me (rails@saizai.com)! I'll add you as a committer. I'd like this to ultimately be a nice
-one-stop library of cool toys that make a Capistrano user's life easier.
-
 
 Enjoy,
  Sai Emrys
