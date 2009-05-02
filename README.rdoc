@@ -1,37 +1,35 @@
-SuperDeploy is a collection of Capistrano recipes; some simple, some not. They just make development easier.
+= SuperDeploy - Capistrano recipes that make development easier
 
 Many of the tasks in it are cobbled together from a number of other sources. I'd credit them, if I hadn't long since forgotten who wrote 'em. If it's you, just email me and I'll do so.
 
 I wrote the log recipes (MIT or CC by-nc-sa, your choice). There are 5:
-- plain
-log - unified log tailer, unfiltered
-log:short - unified log tailer, filtered for just Processing: lines and errors (incl. backtrace)
-- rich
-log:google - assuming you use Google Analytics style parameters to track incoming hits (or intra-site hits too), shows you the combinations of campaign, source, medium, the number of hits for each, and the last content type
-log:google_subtotals - rolls up the hits for each campaign, source, medium, & content (rather than every combination)
-- richest
-log:smart - live log scraper; shows live and aggregate hits, unique IPs, load times, etc by URL hit.
+=== plain
+* log - unified log tailer, unfiltered
+* log:short - unified log tailer, filtered for just Processing: lines and errors (incl. backtrace)
+=== rich
+* log:google - assuming you use Google Analytics style parameters to track incoming hits (or intra-site hits too), shows you the combinations of campaign, source, medium, the number of hits for each, and the last content type
+* log:google_subtotals - rolls up the hits for each campaign, source, medium, & content (rather than every combination)
+=== richest
+* log:smart - live log scraper; shows live and aggregate hits, unique IPs, load times, etc by URL hit.
  It aggregates errors, too - showing just the application-internal backtrace (stripping framework backtracing)
 
 I use log:smart in production to give me a constant heartbeat of the app (what's being used, what methods are running too slowly, any errors that have been happening, overall site load, etc). It's particularly useful during a deployment, so you can make sure everything goes smoothly - or instantly and easily see what went wrong without slogging through a large log file.
 
 Try it out and enjoy.
 
-
-TO INSTALL:
+== Installation
 
 script/plugin install git://github.com/saizai/superdeploy.git
 cap -T # See all you can do
-cap util:logs:smart # use the fancy live hits/errors/loadtimes watcher
+cap log:smart # use the fancy live hits/errors/loadtimes watcher
 
+== Got other cool recipes?
 
-IF YOU HAVE OTHER TRICKS:
 Send me a pull request and I'll merge 'em in!
 
 I'd like this to be a nice one-stop library of cool toys that make a Capistrano user's life easier.
 
-
-KNOWN BUGS:
+== Known bugs
 * the hits/min exponential moving average has something wrong with it. Never got around to fixing.
 * log:smart is not very routing-savvy. If you use something other than simple URLs, it's likely to get confused.
 * all log methods miss some hits. This is because underlyingly, Capistrano breaks stuff up 
@@ -39,6 +37,6 @@ arbitrarily (by size), rather than by paragraph of log. This could be fixed by w
 that acts as a buffer and stitches the log back together again. I never found it worth the bother.
 If you do, please feel free to commit a fix.
 
-Enjoy,
- Sai Emrys
- http://saizai.com
+== Info
+Author:: Sai Emrys (saizai)
+License:: MIT or CC by-nc-sa (your pick) for my stuff; probably MIT for others'
