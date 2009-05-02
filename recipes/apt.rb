@@ -1,4 +1,4 @@
-namespace :util do
+namespace :sys do
   namespace :apt do
     desc "Runs aptitude update on remote server"
     task :update do

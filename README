@@ -2,9 +2,18 @@ SuperDeploy is a collection of Capistrano recipes; some simple, some not. They j
 
 Many of the tasks in it are cobbled together from a number of other sources. I'd credit them, if I hadn't long since forgotten who wrote 'em. If it's you, just email me and I'll do so.
 
-Some - particularly the util:logs:smart, :short, :google, and :google_subtotals - are mine, and released under Creative Commons by-nc-sa license and MIT license (take your pick).
+I wrote the log recipes (MIT or CC by-nc-sa, your choice). There are 5:
+- plain
+log - unified log tailer, unfiltered
+log:short - unified log tailer, filtered for just Processing: lines and errors (incl. backtrace)
+- rich
+log:google - assuming you use Google Analytics style parameters to track incoming hits (or intra-site hits too), shows you the combinations of campaign, source, medium, the number of hits for each, and the last content type
+log:google_subtotals - rolls up the hits for each campaign, source, medium, & content (rather than every combination)
+- richest
+log:smart - live log scraper; shows live and aggregate hits, unique IPs, load times, etc by URL hit.
+ It aggregates errors, too - showing just the application-internal backtrace (stripping framework backtracing)
 
-util:logs:smart is one I use most routinely. It essentially gives you a live aggregated view of  your hits, errors, and load times (by scraping logs), all in a nice little table. 
+I use log:smart in production to give me a constant heartbeat of the app (what's being used, what methods are running too slowly, any errors that have been happening, overall site load, etc). It's particularly useful during a deployment, so you can make sure everything goes smoothly - or instantly and easily see what went wrong without slogging through a large log file.
 
 Try it out and enjoy.
 
@@ -24,8 +33,8 @@ I'd like this to be a nice one-stop library of cool toys that make a Capistrano 
 
 KNOWN BUGS:
 * the hits/min exponential moving average has something wrong with it. Never got around to fixing.
-* util:logs:smart is not routing-savvy. If you use something other than simple URLs, it's likely to get confused.
-* all util:logs methods miss some hits. This is because underlyingly, Capistrano breaks stuff up 
+* log:smart is not very routing-savvy. If you use something other than simple URLs, it's likely to get confused.
+* all log methods miss some hits. This is because underlyingly, Capistrano breaks stuff up 
 arbitrarily (by size), rather than by paragraph of log. This could be fixed by writing a wrapper
 that acts as a buffer and stitches the log back together again. I never found it worth the bother.
 If you do, please feel free to commit a fix.

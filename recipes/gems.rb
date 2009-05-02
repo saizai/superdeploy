@@ -1,4 +1,4 @@
-namespace :util do
+namespace :sys do
   namespace :gems do
     desc "List gems on release servers"
     task :list, :roles => :app do

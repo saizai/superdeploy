@@ -1,8 +1,7 @@
-namespace :util do
-  namespace :logs do
+  namespace :log do
     desc 'Tail logs. Optionally pass name of log you want to check - e.g. cap util:logs mongrel. Defaults to #{rails_env}.log'
     task :default, :roles => :app do
-# NOTE: This is ARGV[2] not ARGV[1] because we use  cap *staging* util:logs instead of just cap *util:logs*. Put it back if needed, or better, do a smart regex
+      # NOTE: This is ARGV[2] not ARGV[1] because we use  cap *staging* util:logs instead of just cap *util:logs*. Put it back if needed, or better, do a smart regex
       log_file = ARGV[2] ? ARGV[2] : fetch(:rails_env, "production")
       run "tail -f #{shared_path}/log/#{log_file}.log" do |channel, stream, data|
         puts  # for an extra line break before the host name
@@ -419,8 +418,8 @@ namespace :util do
                   (subtotals[:source][i][:name] rescue ""), (subtotals[:source][i][:hits] rescue ""),
                   (subtotals[:medium][i][:name] rescue ""), (subtotals[:medium][i][:hits] rescue ""),
                   (subtotals[:content][i][:name] rescue ""), (subtotals[:content][i][:hits] rescue "")]
-#          hitsx += a[:hits]
- #         hitsx_rec += recent_google[i][:hits]
+  #        hitsx += a[:hits]
+  #       hitsx_rec += recent_google[i][:hits]
         }
   #      size[:hits] = [hitsx.to_s.size, 4].max
    #     puts '-' * (size[:campaign] + size[:source] + size[:medium] + size[:content] + 3 * 4 + 4)
@@ -433,4 +432,3 @@ namespace :util do
       end # run
     end # task
   end # logs
-end
