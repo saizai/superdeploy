@@ -37,7 +37,9 @@ namespace (:deploy) do
   # If you do this, be sure to also ensure that all your sekrit config files are in your .gitignore or svn:ignore
   # e.g.: echo 'config/initializers/*_keys.rb' >> .gitignore  
   after "deploy:update_code", "deploy:configs:symlink"
-  
+  # Use shared files directory (eg for uploads)
+  after "deploy:update_code", "deploy:files:symlink"
+
   # Set up special permissions
 #  after "deploy:update_code", "deploy:set_permissions_staging"
 #  task :set_permissions_staging, :except => { :no_release => true } do 

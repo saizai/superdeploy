@@ -82,6 +82,15 @@ namespace :deploy do
     web.enable
   end
   
+  namespace :files do
+    desc "Creates symlinked shared/files folder"
+    task :symlink, :roles => :app do
+      run "rm -rf #{release_path}/public/files"
+      run "mkdir -p #{shared_path}/files"
+      run "ln -nfs #{shared_path}/files #{release_path}/public/files"
+    end
+  end
+
   namespace :configs do
     # Author: Sai Emrys http://saizai.com
     desc "Override config files w/ whatever's in the shared/config path (e.g. passwords, api keys)"
