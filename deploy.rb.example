@@ -25,6 +25,26 @@ set :deploy_to, "/home/#{user}/#{application}/" # where you want the app deploye
 #role :web, "your web-server here"
 #role :db,  "your db-server here", :primary => true, :no_release => true
 
+
+# desc "Act on staging (e.g. cap staging deploy)"
+# task :staging do
+#  # These will override any of the above default settings. 
+#  # Useful for when you have multiple deploy targets (e.g. production, qa, staging, hotswap).
+#  # Only one at a time, though, and make a new task for each target.
+#
+#  # If you're paranoid, you might want to make all role/server settings wrapped in a setup task like this
+#  #  so that it's always explicit what server(s) you're acting on.
+#
+#  role :db, "staging.foo.com", :no_release => true
+#  role :web, "staging.foo.com"
+#  role :app, "staging.foo.com"
+#  ssh_options[:keys] = %w(~/.ssh/slightly_sekrit_staging_key)
+#
+#  # Whatever else you might need to set up that's special for this deployment should be linked in like so:
+#  after "deploy:set_permissions", "deploy:set_permissions_staging"
+# end
+
+
 # Choose your default deploy methods (run cap -T deploy to see your options)
 namespace (:deploy) do
   task :restart, :roles => :app do
