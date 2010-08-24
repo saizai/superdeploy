@@ -43,6 +43,13 @@ namespace :deploy do
       sudo "/usr/bin/god status"
     end
         
+    [ :stop, :start, :restart ].each do |t|
+      desc "#{t.to_s.capitalize} app using god"
+      task t, :roles => :app do
+        sudo "god #{t.to_s} #{application}"
+      end
+    end
+    
     namespace :starling do
       [ :stop, :start, :restart ].each do |t|
         desc "#{t.to_s.capitalize} starling using god"
@@ -59,13 +66,6 @@ namespace :deploy do
           sudo "god #{t.to_s} #{application}-workling"
         end
       end
-    end
-  end
-
-  [ :stop, :start, :restart ].each do |t|
-    desc "#{t.to_s.capitalize} app using god"
-    task t, :roles => :app do
-      sudo "god #{t.to_s} #{application}"
     end
   end
   
@@ -118,6 +118,7 @@ namespace :deploy do
       run "mkdir #{shared_path}/config"
       run "chmod -R go-rwx #{shared_path}/config"
     end
+    after "deploy:setup", "deploy:configs:setup"
   end
 end
 
