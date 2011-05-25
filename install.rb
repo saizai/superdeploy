@@ -19,10 +19,13 @@ else
   puts "You already have both config/deploy.rb and config/deploy.rb.example file..."
 end
 
-open(capfile, 'a') do |f|
-  if system(capify_cmd) && File.exists?(gemfile)
-    f.puts "\nrequire 'bundler/capistrano'"
-  else
-    f.puts "\n# require 'bundler/capistrano' # Uncomment this in case you want to use bundler deploy tasks"
+capified_ok = system(capify_cmd)
+
+if capified_ok
+  open(capfile, 'a') do |f|
+    yes_require = "\nrequire 'bundler/capistrano'"
+    no_require = "\n# require 'bundler/capistrano' # Uncomment this in case you want to use bundler deploy tasks"
+
+    f << File.exists?(gemfile) ? yes_require : no_require
   end
 end
