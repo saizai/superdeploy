@@ -8,7 +8,7 @@ namespace :sys do
   
     desc "Runs aptitude upgrade on remote server"
     task :upgrade do
-      sudo_with_input "aptitude upgrade", /^Do you want to continue\?/
+      sudo "aptitude upgrade"
     end
   
     desc "Search for aptitude packages on remote server"
@@ -28,7 +28,7 @@ namespace :sys do
       logger.info "Updating packages..."
       sudo "aptitude update"
       logger.info "Installing #{deb_pkg_name}..."
-      sudo_with_input "aptitude install #{deb_pkg_name}", /^Do you want to continue\?/
+      sudo "aptitude install #{deb_pkg_name}"
     end
   end
 end
