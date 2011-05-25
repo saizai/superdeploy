@@ -12,7 +12,7 @@ elsif !File.exists? real_example
   FileUtils.cp example_deploy, real_example
   puts "SuperDeploy installed. Please edit config/deploy.rb.example"
 else
-  puts "You already have a config/deploy.rb.example file..."
+  puts "You already have both config/deploy.rb and config/deploy.rb.example file..."
 end
 
 exec "capify #{RAILS_ROOT}"
