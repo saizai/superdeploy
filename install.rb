@@ -26,6 +26,6 @@ if capified_ok
     yes_require = "\nrequire 'bundler/capistrano'"
     no_require = "\n# require 'bundler/capistrano' # Uncomment this in case you want to use bundler deploy tasks"
 
-    f << File.exists?(gemfile) ? yes_require : no_require
+    f << (File.exists?(gemfile) ? yes_require : no_require)
   end
 end
