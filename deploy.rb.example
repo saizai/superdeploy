@@ -15,7 +15,7 @@ set :deploy_to, "/home/#{user}/#{application}/" # where you want the app deploye
 # set :use_sudo, false # Uncomment if eg you run on a shared host like DreamHost
 # ssh_options[:keys] = %w(~/.ssh/sekrit_deploy_key) # You really should use public keys. It's much easier. Make sure it works on your repo too.
 # ssh_options[:port] = 25
-# set :default_environment "PATH", "$PATH:/your/custom/ruby/path" # Uncomment if you use a non standard ruby bin PATH (eg when using rvm or ruby enterprise edition)
+# set :default_environment, :PATH => "$PATH:/your/custom/ruby/path" # Uncomment if you use a non standard ruby bin PATH (eg when using rvm or ruby enterprise edition)
 # set :ip, '##.##.##.##' # IP of repository. Better than using DNS lookups, if it's static
 
 # :no_release => true means that no code will be deployed to that box (but non-code tasks may run on it)
