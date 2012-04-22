@@ -108,7 +108,7 @@ namespace :deploy do
        config_files << data
       end
       # Extract the names of all config files
-      config_files.strip.split("\n").map{|f| f.sub!("#{shared_path}/config/", '')}.each do |c|
+      config_files.strip.split("\n").map{|f| f.sub("#{shared_path}/config/", '').strip}.each do |c|
         run "ln -sf #{shared_path}/config/#{c} #{release_path}/config/#{c}" # And symlink in the server's version, overwriting (-f) whatever was there
       end
     end
